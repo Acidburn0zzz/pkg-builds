@@ -1,0 +1,49 @@
+# Maintainer: arch3y <arch3y@archstrike.org>
+
+_pkgname=pyvmomi
+pkgbase=python-$_pkgname
+
+
+pkgname=(python-$_pkgname python2-$_pkgname)
+pkgver=5.5.0.2014.1.1
+pkgrel=1
+pkgdesc=" VMware vSphere API Python Bindings"
+url="https://github.com/vmware/pyvmomi"
+arch=('any')
+license=('APACHE')
+makedepends=('python-setuptools' 'python2-setuptools')
+source=("https://github.com/vmware/pyvmomi/archive/v$pkgver.tar.gz")
+sha512sums=('76ec526a55cb81196d61edc4fddb6d8fa2d12bbeab2d40593522a631e88573268d647d276aa714e3f004d2cabc6a1e5d3999657c02a9fb05fe779d768f7dad2f')
+
+prepare() {
+  cp -a $_pkgname-$pkgver{,-py2}
+}
+
+build() {
+  cd "$srcdir/$_pkgname-$pkgver"
+  python3 setup.py build
+
+  cd "$srcdir/$_pkgname-$pkgver-py2"
+  python2 setup.py build
+}
+
+package_python-pyvmomi() {
+  depends=('python-six' 'python-requests')
+
+  cd "$srcdir/$_pkgname-$pkgver"
+  python3 setup.py install --root="$pkgdir/" --optimize=1
+  install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+  #clean up mess
+  rm -rf $pkgdir/usr/{LICENSE.txt,MANIFEST.in,NOTICE.txt,setup.cfg,setup.py,tox.ini}
+}
+
+package_python2-pyvmomi() {
+  depends=('python2' 'python-six' 'python-requests')
+
+  cd "$srcdir/$_pkgname-$pkgver-py2"
+  python2 setup.py install --root="$pkgdir/" --optimize=1
+  install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+  sed -i 's|env python|env python2|' $pkgdir/usr/lib/python2.7/site-packages/pyVmomi/DynamicTypeManagerHelper.py $pkgdir/usr/lib/python2.7/site-packages/pyVmomi/ManagedMethodExecutorHelper.py $pkgdir/usr/lib/python2.7/site-packages/pyVmomi/Iso8601.py
+  #clean up mess
+  rm -rf $pkgdir/usr/{LICENSE.txt,MANIFEST.in,NOTICE.txt,setup.cfg,setup.py,tox.ini}
+}
