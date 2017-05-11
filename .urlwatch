@@ -1,0 +1,5 @@
+name: 'silk'
+command: 'curl http://tools.netsa.cert.org/silk/download.html 2>/dev/null |grep -E "silk-([0-9][0-9\.]*)\.tar.gz"'
+---
+
+# vim: ft=yaml
